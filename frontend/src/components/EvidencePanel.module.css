@@ -1,0 +1,13 @@
+.panel { border: 1px solid var(--border); border-radius: 11px; background: var(--surface); margin-top: 18px; padding: 23px; scroll-margin-top: 24px; }
+.header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }.header h2 { margin: 7px 0 0; font-size: 17px; letter-spacing: -.02em; font-weight: 550; }
+.status { font-size: 10px; color: #a8c2b8; border: 1px solid #32483f; border-radius: 5px; padding: 5px 8px; flex-shrink: 0; }.unknown { color: #c9b98e; border-color: #514b3a; }
+.unknownNote { color: #c9b98e; font-size: 11px; line-height: 1.8; margin: 0 0 15px; }
+.cutoff { margin: 13px 0 21px; font-size: 10px; color: var(--subtle); line-height: 1.6; }
+.empty { display: flex; gap: 14px; padding: 20px; border: 1px dashed #33404e; border-radius: 7px; background: #121b25; }.empty > span { color: #8e9daa; }.empty strong { font-size: 12px; font-weight: 500; }.empty p { color: var(--muted); font-size: 11px; margin: 7px 0 0; line-height: 1.8; max-width: 65ch; }
+.items { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr)); gap: 14px; }
+.item { border: 1px solid var(--border); padding: 19px; border-radius: 8px; background: #101924; }
+.itemTop { display: flex; justify-content: space-between; gap: 10px; color: var(--subtle); font-size: 9px; text-transform: uppercase; letter-spacing: .07em; }
+.item h3 { font-size: 13px; font-weight: 550; line-height: 1.7; margin: 15px 0 7px; }.summary { font-size: 11px; color: var(--muted); line-height: 1.8; margin: 0; }
+.metadata { border-top: 1px solid var(--border); padding-top: 12px; margin: 15px 0 0; }.metadata > div { display: flex; gap: 12px; align-items: baseline; margin-top: 7px; font-size: 9px; line-height: 1.8; }.metadata dt { color: var(--subtle); min-width: 58px; }.metadata dd { color: var(--muted); margin: 0; }.metadata a { color: var(--green); }
+.panel footer { font-size: 10px; line-height: 1.7; margin-top: 18px; color: var(--subtle); }
+@media (max-width: 500px) { .panel { padding: 19px 17px; }.header { align-items: flex-start; flex-wrap: wrap; }.header h2 { font-size: 16px; }.metadata > div { flex-wrap: wrap; gap: 2px 12px; } }

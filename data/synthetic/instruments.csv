@@ -1,0 +1,7 @@
+symbol,name,sector,kind,available_at,source
+DEMO_ALPHA,Alpha Industries (fictional),Industrials,underlying,2026-01-01T00:00:00+05:30,Synthetic fixture
+DEMO_BETA,Beta Retail (fictional),Consumer,underlying,2026-01-01T00:00:00+05:30,Synthetic fixture
+DEMO_GAMMA,Gamma Technologies (fictional),Technology,underlying,2026-01-01T00:00:00+05:30,Synthetic fixture
+DEMO_DELTA,Delta Finance (fictional),Financials,underlying,2026-01-01T00:00:00+05:30,Synthetic fixture
+DEMO_EPSILON,Epsilon Materials (fictional),Materials,underlying,2026-01-01T00:00:00+05:30,Synthetic fixture
+DEMO_NIFTY,Demo Nifty (fictional benchmark),Market context,benchmark,2026-01-01T00:00:00+05:30,Synthetic fixture

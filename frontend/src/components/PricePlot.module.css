@@ -1,0 +1,7 @@
+.wrapper { padding: 20px 22px 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.heading { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 10px; color: var(--muted); margin-bottom: 14px; }
+.legend { display: flex; align-items: center; gap: 6px; color: var(--subtle); font-size: 9px; }.legend i { width: 12px; height: 1px; border-top: 1px dashed #778a93; }
+.chart { width: 100%; max-height: 220px; display: block; overflow: visible; }
+.axis { fill: #7c8b9d; font-size: 9px; font-family: inherit; font-variant-numeric: tabular-nums; }
+.wrapper p { margin: 10px 0 0; font-size: 9px; line-height: 1.7; color: var(--subtle); }
+.empty { padding: 34px 22px; color: var(--muted); font-size: 12px; border-block: 1px solid var(--border); line-height: 1.6; }

@@ -1,0 +1,23 @@
+# Local dependencies and build outputs
+.venv/
+.python/
+artifacts/
+node_modules/
+dist/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+*.egg-info/
+
+# Credentials and private research records
+.env
+.env.*
+!.env.example
+private-data/
+*.sqlite
+*.sqlite3
+*.db
+*.log
+.DS_Store

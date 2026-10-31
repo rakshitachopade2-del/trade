@@ -1,0 +1,5 @@
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; font-size: 10px; font-weight: 650; letter-spacing: .01em; border: 1px solid transparent; border-radius: 5px; white-space: nowrap; }
+.dot { width: 4px; height: 4px; border-radius: 50%; background: currentColor; }
+.qualified { color: #9de8c4; background: #153b302b; border-color: #245845; }
+.watching { color: #dbc69b; background: #493c2429; border-color: #55472d; }
+.blocked { color: #a7b1bf; background: #26303d4d; border-color: #303a48; }
