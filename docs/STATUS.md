@@ -10,6 +10,13 @@ Updated: 31 October 2026 (IST).
 - This is now the user's local macOS working copy, replacing the earlier cloud-workspace handoff state.
 - No broker, paid API, AI inference provider, production deployment or schedule is connected.
 
+## GitHub synchronization blocker
+
+- Verified application committed locally as `d7e5179` (`Complete synthetic replay milestone and browser verification`).
+- `git push -u origin main` reached GitHub using the existing macOS Keychain credentials, but returned HTTP 403: permission to `rakshitachopade2-del/trade.git` denied to `RakshitChopade26`.
+- Nothing has been pushed. Grant the configured account write access or authenticate locally as an authorized account, then retry `git push -u origin main`. Do not paste credentials into chat or change global Git identity to solve an authentication problem.
+- The local frontend and backend were started successfully; the frontend returned HTTP 200 and `/api/health` returned `synthetic_demo` with `orders_enabled: false`.
+
 ## Current milestone
 
 Milestone 1: synthetic research replay foundation implemented and locally verified. React/TypeScript dashboard, CSS modules, FastAPI read-only endpoints, strict CSV validator, deterministic as-of engine, five fictional underlyings and one benchmark, evidence availability, and documented local setup.
