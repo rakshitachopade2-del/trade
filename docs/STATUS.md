@@ -2,11 +2,27 @@
 
 Updated: 1 November 2026 (IST).
 
+## Owner-authorized feature-branch publication — 1 November 2026
+
+- Following explicit owner instruction to commit and push, `git push -u origin feat/milestone-2a-local-intake` published implementation `9f0a1d04a534d741130217b74d8cc25c856d95b4`. `git ls-remote` confirmed the exact branch commit; remote main remains `a407e043e781d4d5e88794173f046c5d04ba6477`.
+- The accompanying documentation update records review findings and adds `Dev Ref/M2A_REVIEW_PREPARATION.md` and `Dev Ref/M2A_AI_CHAT_HANDOFF.md`. Read the shorter preparation handoff first. Ignored review artifacts and private sample inputs/reports remain local-only.
+- No application behavior changed. The financial-figure gate remains unresolved and genuine-data validation remains pending (exit 1, partial, 0/36 bars). Existing implementation test results below are historical; full suites were not rerun for this documentation-only update.
+- No merge, history rewrite, global Git identity change or deployment. Earlier local-only/no-push entries describe their respective stages and are superseded by this publication update.
+
+## Bounded M2A review preparation — 1 November 2026
+
+- Preserved `feat/milestone-2a-local-intake` at `9f0a1d04a534d741130217b74d8cc25c856d95b4`. Exported 36 committed files/additions/tests against `a407e043e781d4d5e88794173f046c5d04ba6477` to ignored `artifacts/reviews/m2a-9f0a1d0/M2A_committed_review.patch`. Credential-pattern and data-inventory checks found no credentials/private market inputs; exported data is synthetic fixtures or empty templates.
+- Initial state: no tracked edits; only `Dev Ref/M2A_AI_CHAT_HANDOFF.md` untracked. This task adds this documentation log and `Dev Ref/M2A_REVIEW_PREPARATION.md`, excluded from the committed patch. No commits/pushes/resets during that bounded preparation.
+- Finding (unchanged): null figures are schema-valid (`schema.py:192`), but zero current figures adds `filing_figures_missing` (`runner.py:335`) and gates overall completion (`runner.py:346`, `report.py:134`, frontend coverage validator `:90`). Isolated synthetic probe: otherwise complete, 36 bars, exact/reconciled filing, all figures null => partial with that sole gap. Two related existing tests passed; no full-suite rerun.
+- Created ignored `private-data/real-sample/` from the blank template because it was absent. Candidate mappings preserved, user_import, empty list/header-only candles, no configured filing, null figures/unknown publication, unresolved retention, false reviews. Provider timezone set to null in this private copy. No invented evidence copied there; input hashes unchanged after intake.
+- `.venv/bin/python -m backend.app.intake private-data/real-sample` returned exit **1**, **partial**, **0/36 bars**. Report: `private-data/imports/20261101T120739858148Z-3d1ed43fb95b/report.json`. Gaps: `adjustment_unknown`, `eligibility_review_pending`, `filing_missing`, `missing_bars`, `retention_pending`, `session_review_pending`, `source_dates_unknown`, `source_review_pending`, `source_unknown`, `stock_list_missing`. Genuine validation remains pending; provider data not read/retained while permission is unresolved.
+- Short handoff and missing-files/facts checklist: `Dev Ref/M2A_REVIEW_PREPARATION.md`. Export metadata, isolated reproduction and CLI output: ignored `artifacts/reviews/m2a-9f0a1d0/`. Application source/dashboard unchanged.
+
 ## Milestone 2A — local implementation, 1 November 2026
 
 **M2A software implemented; real-data coverage experiment pending input.** No genuine candle export, stock list, exchange listing document or quarterly filing was supplied. All exercised complete-path data and documentary review records are clearly labelled invented software fixtures.
 
-- Started from clean `main` at `a407e043e781d4d5e88794173f046c5d04ba6477`; remote main matched. No additional AGENTS.md files applied. Work is on `feat/milestone-2a-local-intake`, for local review only. No M2A push or deployment was performed; the earlier GitHub synchronization section below describes M1 history.
+- Started from clean `main` at `a407e043e781d4d5e88794173f046c5d04ba6477`; remote main matched. No additional AGENTS.md files applied. Implementation was prepared on `feat/milestone-2a-local-intake` for local review only. At that stage no M2A push or deployment was performed; the earlier GitHub synchronization section below describes M1 history.
 - Added a bounded offline `python -m backend.app.intake` CLI: explicit manifest schema, normalized text/CSV stock lists, three-equity/one-index candle coverage, file hashes, actual ingestion timestamps, immutable run directories, and separately attributed earlier-acquisition claims. No historical `available_at` is invented.
 - Added manual filing intake with source-document hashes, exact/date-only/unknown publication precision, separately recorded transcription/reconciliation, nullable figures and guarded YoY comparisons. No OCR, LLM extraction or financial score.
 - Kept user membership assertions separate from dated documentary review, and listing separate from ban/liquidity. Unknown mappings and missing/zero equity/index volume remain distinct. Conflicting duplicates invalidate coverage; no prices are filled.
