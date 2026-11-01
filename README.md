@@ -2,7 +2,7 @@
 
 A local research foundation for an Indian stock-options decision-support app. Built with React, TypeScript, CSS modules and Python/FastAPI.
 
-**Current milestone: synthetic replay only.** All instruments, prices, eligibility records and quarterly evidence in the bundled demo are fictional. There is no Zerodha connection, live feed, AI inference, options P&L, order execution or demonstrated trading edge.
+**Current behavior: synthetic research replay plus separate offline data-coverage intake.** All instruments, prices, eligibility records and quarterly evidence in the bundled demo are fictional. There is no Zerodha connection, live feed, AI inference, options P&L, order execution or demonstrated trading edge.
 
 ## Run on your computer
 
@@ -57,7 +57,7 @@ For rendered browser verification, install Google Chrome and stop the developmen
 npm --prefix frontend run test:browser
 ```
 
-Playwright uses installed Chrome and starts its own servers on ports 8000 and 15173. Eight checks cover desktop, tablet, mobile and narrow-mobile layouts, all replay times, evidence cutoffs, exclusion reasons, keyboard navigation, automated accessibility checks, and an actual backend shutdown/restart. Screenshots and failure traces stay in ignored `artifacts/browser/`. The suite stops only its own backend process and refuses an occupied backend port. This is Chromium verification, not a Safari/Firefox or physical-device certification.
+Playwright uses installed Chrome and starts its own servers on ports 8000 and 15173. Twelve checks cover desktop, tablet, mobile and narrow-mobile layouts, all replay times, evidence cutoffs, exclusion reasons, keyboard navigation, automated accessibility checks, actual backend shutdown/restart, and the separate coverage panel across no-import/partial/invalid/complete-synthetic/error states. Screenshots and failure traces stay in ignored `artifacts/browser/`. The suite stops only its own backend process and refuses an occupied backend port. This is Chromium verification, not a Safari/Firefox or physical-device certification.
 
 In the dashboard, change the replay clock:
 
@@ -73,7 +73,23 @@ Select the unknown-fundamentals example: missing financial evidence stays unknow
 
 Priority is a deterministic research ordering, **not a probability of profit**. Fundamentals are a separate sourced-evidence panel in this milestone, not a bullish vote. No buy/sell action is provided.
 
-## Bring data later
+## Offline sample coverage (Milestone 2A)
+
+The new **Data coverage** panel is separate from research calculations. No imported prices or financials enter the synthetic rankings. No genuine files have been supplied or validated yet.
+
+```bash
+# Invented engineering example; a successful run is not a real-data trial:
+.venv/bin/python -m backend.app.intake data/intake-example
+
+# Your local inputs (keep them out of tracked directories):
+.venv/bin/python -m backend.app.intake /absolute/path/to/local-inputs
+```
+
+The CLI writes a new immutable run under ignored `private-data/imports/`, with JSON/text coverage reports and, when local retention is permitted, original bytes and normalized data. Exit codes: 0 = coverage complete, 1 = partial/missing input, 2 = invalid/failure. The exact input schemas, blank templates, financial precision rules and remaining input needs are documented in [docs/MILESTONE_2A.md](docs/MILESTONE_2A.md).
+
+Set `TRADE_COVERAGE_REPORT` to the generated report.json path when starting the backend. At http://127.0.0.1:5173/#data-coverage expand **View coverage details**. Without configuration it shows **Not imported**; there is no automatic success fixture fallback. The read-only API exposes sanitized coverage only.
+
+## Existing four-CSV validator
 
 The CLI can validate a directory containing the four CSV files described in [data/README.md](data/README.md):
 
@@ -81,7 +97,7 @@ The CLI can validate a directory containing the four CSV files described in [dat
 .venv/bin/python -m backend.app.validate /absolute/path/to/your/csv-directory
 ```
 
-External directories are labelled `unverified_import`. Passing schema checks establishes structural validity only, not factual correctness, licensing, complete coverage or freedom from hindsight. The HTTP demo continues to serve bundled synthetic fixtures. Real-data display and broker adapters are the next milestone.
+External directories are labelled `unverified_import`. Passing schema checks establishes structural validity only, not factual correctness, licensing, complete coverage or freedom from hindsight. The HTTP demo continues to serve bundled synthetic fixtures. This is the M1 validator, not the M2A importer. Real inputs never feed the HTTP replay.
 
 Keep credentials, trade exports and proprietary datasets in ignored local storage, not this public code repository. Use a local secret store when authentication is eventually added.
 
@@ -92,7 +108,9 @@ Keep credentials, trade exports and proprietary datasets in ignored local storag
 - `backend/tests/`: meaningful data and time-boundary regression tests.
 - `data/synthetic/`: explicitly fictional input fixtures.
 - `docs/PROJECT_BRIEF.md`: agreed scope and unresolved product choices.
-- `docs/MILESTONE_1.md`: current behavior and acceptance criteria.
+- `docs/MILESTONE_1.md`: synthetic replay behavior and acceptance criteria.
+- `docs/MILESTONE_2A.md`: offline intake schemas, commands and coverage semantics.
+- `data/intake-example/`, `data/intake-template/`: invented examples and blank input templates.
 - `docs/API_CONTRACT.md`: shared response contract.
 - `docs/STATUS.md`: verified progress and next work.
 - `docs/LOCAL_CODEX_HANDOFF.md`: instructions for continuing in VS Code.

@@ -1,0 +1,4 @@
+SYNTHETIC TEST ONLY. Fictional stock-option listing rows, not exchange evidence.
+1 DEMO_ALPHA stock_option 2026-10-30
+2 DEMO_BETA stock_option 2026-10-30
+3 DEMO_GAMMA stock_option 2026-10-30

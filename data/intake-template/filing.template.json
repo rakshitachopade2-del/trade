@@ -1,0 +1,22 @@
+{
+  "schema_version": "local-filing-v1",
+  "symbol": "INFY",
+  "company": "Infosys",
+  "reporting_period": "Q2 FY27",
+  "quarter_end": "2026-09-30",
+  "accounting_basis": "Unknown",
+  "scope": "consolidated",
+  "source_url": null,
+  "document": "filing.pdf",
+  "sha256": null,
+  "source_pages": "Enter document page references",
+  "publication": {
+    "precision": "unknown"
+  },
+  "claimed_acquired": null,
+  "transcription_status": "unreviewed",
+  "reconciliation_reference": null,
+  "revenue": null,
+  "profit_attributable_to_owners": null,
+  "diluted_eps": null
+}

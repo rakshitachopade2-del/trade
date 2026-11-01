@@ -1,4 +1,5 @@
-import { spawn, type ChildProcess } from 'node:child_process';
+import { execFileSync, spawn, type ChildProcess } from 'node:child_process';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
 import { test, expect, type Page } from '@playwright/test';
@@ -6,6 +7,16 @@ import AxeBuilder from '@axe-core/playwright';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 let backend: ChildProcess | undefined;
+let reportPath = '';
+let originalReport: string;
+
+function prepareCoverage() {
+  const directory = execFileSync(`${root}.venv/bin/python`, ['-c', 'from pathlib import Path; from backend.app.intake.runner import run_import; print(run_import(Path("data/intake-example"), Path("private-data/browser-checks"))[0])'], { cwd: root, encoding: 'utf8' }).trim();
+  originalReport = readFileSync(`${root}${directory}/report.json`, 'utf8');
+  // Mutate only a disposable browser fixture, preserving the original import run.
+  reportPath = `${root}${directory}/browser-report.json`;
+  writeFileSync(reportPath, originalReport);
+}
 
 async function startBackend() {
   // Refuse occupied ports so the outage check never stops another user's server.
@@ -15,7 +26,7 @@ async function startBackend() {
     probe.once('error', reject);
     probe.listen(8000, '127.0.0.1', () => probe.close(() => resolve()));
   });
-  backend = spawn(`${root}.venv/bin/python`, ['-m', 'uvicorn', 'backend.app.main:app', '--host', '127.0.0.1', '--port', '8000'], { cwd: root, stdio: 'pipe' });
+  backend = spawn(`${root}.venv/bin/python`, ['-m', 'uvicorn', 'backend.app.main:app', '--host', '127.0.0.1', '--port', '8000'], { cwd: root, stdio: 'pipe', env: { ...process.env, TRADE_COVERAGE_REPORT: reportPath } });
   let output = '';
   backend.stdout?.on('data', data => { output += data; });
   backend.stderr?.on('data', data => { output += data; });
@@ -47,7 +58,7 @@ async function checkLayout(page: Page) {
   expect(results.violations).toEqual([]);
 }
 
-test.beforeAll(startBackend);
+test.beforeAll(async () => { prepareCoverage(); await startBackend(); });
 test.afterAll(stopBackend);
 
 test('replay, evidence, exclusions, keyboard access and responsive layout', async ({ page }, testInfo) => {
@@ -116,4 +127,63 @@ test('real backend outage clears results and retry recovers', async ({ page }, t
   await page.getByRole('button', { name: 'Retry connection' }).click();
   await expect(page.getByRole('button', { name: /ALPHA/ })).toBeVisible();
   await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+
+test('coverage view uses offline reports and keeps research synthetic across all states', async ({ page }, testInfo) => {
+  const savedPath = reportPath;
+  const coverage = page.getByRole('region', { name: 'Data coverage', exact: true });
+  const refresh = () => coverage.getByRole('button', { name: 'Refresh coverage' }).click();
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: /ALPHA/ })).toBeVisible();
+  await expect(coverage.getByText('Coverage complete', { exact: true })).toBeVisible();
+  await coverage.getByText('View coverage details').focus();
+  await page.keyboard.press('Enter');
+  await expect(coverage.getByRole('table')).toBeVisible();
+  await expect(coverage.getByText('Synthetic test — not a real-data trial')).toBeVisible();
+  await expect(coverage.getByText('9 / 9')).toHaveCount(4);
+  await page.keyboard.press('Tab');
+  await expect(coverage.getByRole('button', { name: 'Refresh coverage' })).toBeFocused();
+  await checkLayout(page);
+  await coverage.screenshot({ path: testInfo.outputPath('coverage-complete-synthetic.png') });
+
+  const partial = JSON.parse(originalReport);
+  Object.assign(partial.coverage, { status: 'partial', dataset_nature: 'user_import', gaps: ['missing_bars', 'eligibility_review_pending', 'filing_publication_partial'] });
+  Object.assign(partial.coverage.series[0], { present: 8, missing: ['09:20'] });
+  Object.assign(partial.coverage.membership[0], { level: 'user_assertion', dated_review: false });
+  partial.coverage.filing.publication_precision = 'date_only';
+  // Synthetic report mutation exercises presentation; no genuine source is claimed.
+  writeFileSync(savedPath, JSON.stringify(partial));
+  await refresh();
+  await expect(coverage.getByText('Partial', { exact: true })).toBeVisible();
+  await expect(coverage.getByText('8 / 9')).toBeVisible();
+  await checkLayout(page);
+  await coverage.screenshot({ path: testInfo.outputPath('coverage-partial.png') });
+
+  Object.assign(partial.coverage, { status: 'invalid', schema_valid: false, invalid_rows: 1, gaps: ['invalid_rows'] });
+  writeFileSync(savedPath, JSON.stringify(partial));
+  await refresh();
+  await expect(coverage.getByText('Invalid inputs', { exact: true })).toBeVisible();
+  writeFileSync(savedPath, '{"schema_version":"future"}');
+  await refresh();
+  await expect(coverage.getByText('Invalid report', { exact: true })).toBeVisible();
+  await expect(coverage.getByRole('table')).toHaveCount(0);
+  writeFileSync(savedPath, originalReport);
+
+  await stopBackend();
+  reportPath = '';
+  await startBackend();
+  await refresh();
+  await expect(coverage.getByText('Not imported', { exact: true })).toBeVisible();
+  await stopBackend();
+  await refresh();
+  await expect(coverage.getByRole('alert')).toContainText('HTTP 500');
+  await expect(coverage.getByRole('table')).toHaveCount(0);
+  reportPath = savedPath;
+  await startBackend();
+  await refresh();
+  await expect(coverage.getByText('Coverage complete', { exact: true })).toBeVisible();
+  await expect(page.getByText('Synthetic demo', { exact: true })).toBeVisible();
+  await expect(page.getByText('Contract not evaluated', { exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /ALPHA/ })).toBeVisible();
 });

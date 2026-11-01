@@ -1,0 +1,66 @@
+{
+  "schema_version": "local-intake-v1",
+  "dataset_id": "local-sample",
+  "dataset_nature": "user_import",
+  "source_label": null,
+  "source_url": null,
+  "source_date": null,
+  "as_of_date": null,
+  "claimed_acquired": null,
+  "session_date": "2026-10-30",
+  "timezone": "Asia/Kolkata",
+  "source_timezone": "Asia/Kolkata",
+  "sample_start": "09:15",
+  "sample_end": "10:00",
+  "interval_minutes": 5,
+  "timestamp_convention": "bar_start",
+  "price_adjustment": "unknown",
+  "retention": "unresolved",
+  "retention_note": null,
+  "normal_session_review": {
+    "confirmed": false,
+    "reference": null
+  },
+  "source_review": {
+    "confirmed": false,
+    "reference": null
+  },
+  "instruments": [
+    {
+      "source_symbol": "INFY",
+      "symbol": "INFY",
+      "exchange": "NSE",
+      "instrument_type": "equity",
+      "sample": true
+    },
+    {
+      "source_symbol": "RELIANCE",
+      "symbol": "RELIANCE",
+      "exchange": "NSE",
+      "instrument_type": "equity",
+      "sample": true
+    },
+    {
+      "source_symbol": "HDFCBANK",
+      "symbol": "HDFCBANK",
+      "exchange": "NSE",
+      "instrument_type": "equity",
+      "sample": true
+    },
+    {
+      "source_symbol": "NIFTY 50",
+      "symbol": "NIFTY50",
+      "exchange": "NSE",
+      "instrument_type": "spot_index",
+      "sample": true
+    }
+  ],
+  "stock_list": {
+    "file": "stocks.txt",
+    "source_label": null,
+    "source_date": null,
+    "as_of_date": null,
+    "evidence": []
+  },
+  "filing": null
+}

@@ -6,6 +6,7 @@ import SummaryCards from './components/SummaryCards';
 import CandidateList from './components/CandidateList';
 import ResearchDetail from './components/ResearchDetail';
 import EvidencePanel from './components/EvidencePanel';
+import DataCoverage from './components/DataCoverage';
 import styles from './App.module.css';
 
 const errorMessage = (error: unknown) => error instanceof Error ? error.message : 'The research API could not be reached. Check the local server and retry.';
@@ -114,6 +115,7 @@ export default function App() {
           {candidate && <EvidencePanel candidate={candidate} asOf={replay.as_of} />}
           <footer className={styles.footer}><span>{replay.source}</span><span>No model calls <i>·</i> No order execution <i>·</i> Research v0.1</span></footer>
         </>}
+        <DataCoverage />
       </main>
     </div>
   </div>;

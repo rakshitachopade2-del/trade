@@ -1,0 +1,35 @@
+{
+  "schema_version": "local-filing-v1",
+  "symbol": "DEMO_ALPHA",
+  "company": "Fictional Alpha",
+  "reporting_period": "Synthetic Q2 FY27",
+  "quarter_end": "2026-09-30",
+  "accounting_basis": "Synthetic Ind AS example",
+  "scope": "consolidated",
+  "source_url": "https://example.invalid/synthetic-filing",
+  "document": "filing.txt",
+  "sha256": "307d73d76f27f37b6820752a34fc64a618395399d798d65b47e1c6f5ddb65120",
+  "source_pages": "Page 1",
+  "publication": {
+    "precision": "exact",
+    "timestamp": "2026-10-20T10:00:00+05:30",
+    "record_document": "publication.txt",
+    "record_reference": "Fictional record line 1"
+  },
+  "claimed_acquired": null,
+  "transcription_status": "reconciled",
+  "reconciliation_reference": "Manual check against the bundled fictional text only",
+  "revenue": {
+    "unit": "INR million",
+    "prior_unit": "INR million",
+    "current": 100.0,
+    "prior": 80.0,
+    "current_period_end": "2026-09-30",
+    "prior_period_end": "2025-09-30",
+    "current_period_months": 3,
+    "prior_period_months": 3,
+    "page_row_reference": "Page 1 revenue row"
+  },
+  "profit_attributable_to_owners": null,
+  "diluted_eps": null
+}

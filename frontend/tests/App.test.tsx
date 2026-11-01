@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from 'vitest';
 import App from '../src/App';
 import { demo, jsonResponse, replayAt, times } from './fixtures';
 
+vi.mock('../src/coverage', () => ({ getCoverage: async () => ({ api_version: 'coverage-api-v1', state: 'not_imported', report: null }) }));
+
 function path(input: RequestInfo | URL): URL {
   return new URL(String(input), 'http://localhost');
 }

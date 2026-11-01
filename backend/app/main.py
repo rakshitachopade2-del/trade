@@ -1,4 +1,4 @@
-"""Loopback-only demo API. The HTTP app only loads bundled synthetic fixtures."""
+"""Loopback API: synthetic replay plus a separate, sanitized local coverage report."""
 
 from contextlib import asynccontextmanager
 
@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException, Query
 
 from .engine import replay
 from .loader import load_dataset, parse_timestamp
+from .coverage_api import data_coverage
 
 REPLAY_TIMES = [f"2026-10-30T09:{minute}:00+05:30" for minute in ("30", "35", "40")]
 
@@ -18,6 +19,11 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Trade research — synthetic demo", version="0.1.0", lifespan=lifespan)
+
+
+@app.get("/api/data-coverage")
+def coverage_endpoint():
+    return data_coverage()
 
 
 @app.get("/api/health")

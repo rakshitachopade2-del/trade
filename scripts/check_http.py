@@ -24,7 +24,7 @@ def main() -> None:
     try:
         processes.append(subprocess.Popen(
             [sys.executable, "-m", "uvicorn", "backend.app.main:app", "--host", "127.0.0.1", "--port", "8000"],
-            cwd=root, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, start_new_session=True,
+            cwd=root, env={**os.environ, "TRADE_COVERAGE_REPORT": ""}, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, start_new_session=True,
         ))
         processes.append(subprocess.Popen(
             ["npm", "run", "dev", "--", "--port", "15173", "--strictPort"],
@@ -41,6 +41,9 @@ def main() -> None:
                 time.sleep(0.1)
         else:
             raise RuntimeError("Development servers did not become ready.")
+        with opener.open(base + "/api/data-coverage?path=/etc/passwd", timeout=2) as response:
+            coverage = json.load(response)
+        assert coverage == {"api_version": "coverage-api-v1", "state": "not_imported", "report": None}
         assert health["mode"] == "synthetic_demo" and health["orders_enabled"] is False
         with opener.open(base, timeout=2) as response:
             assert 'id="root"' in response.read().decode()

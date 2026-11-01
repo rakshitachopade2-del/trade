@@ -1,0 +1,103 @@
+{
+  "schema_version": "local-intake-v1",
+  "dataset_id": "synthetic-coverage-example",
+  "dataset_nature": "synthetic_test",
+  "source_label": "Synthetic engineering fixture",
+  "source_url": null,
+  "source_date": "2026-10-30",
+  "as_of_date": null,
+  "claimed_acquired": null,
+  "session_date": "2026-10-30",
+  "timezone": "Asia/Kolkata",
+  "source_timezone": "Asia/Kolkata",
+  "sample_start": "09:15",
+  "sample_end": "10:00",
+  "interval_minutes": 5,
+  "timestamp_convention": "bar_start",
+  "price_adjustment": "unadjusted",
+  "retention": "permitted",
+  "retention_note": "Invented engineering data distributed with this repository.",
+  "normal_session_review": {
+    "confirmed": true,
+    "reference": "Synthetic fixture review only; no actual exchange or provider verification"
+  },
+  "source_review": {
+    "confirmed": true,
+    "reference": "Synthetic fixture review only; no actual exchange or provider verification"
+  },
+  "instruments": [
+    {
+      "source_symbol": "DEMO_ALPHA",
+      "symbol": "DEMO_ALPHA",
+      "exchange": "NSE",
+      "instrument_type": "equity",
+      "sample": true
+    },
+    {
+      "source_symbol": "DEMO_BETA",
+      "symbol": "DEMO_BETA",
+      "exchange": "NSE",
+      "instrument_type": "equity",
+      "sample": true
+    },
+    {
+      "source_symbol": "DEMO_GAMMA",
+      "symbol": "DEMO_GAMMA",
+      "exchange": "NSE",
+      "instrument_type": "equity",
+      "sample": true
+    },
+    {
+      "source_symbol": "DEMO_NIFTY",
+      "symbol": "NIFTY50",
+      "exchange": "NSE",
+      "instrument_type": "spot_index",
+      "sample": true
+    }
+  ],
+  "stock_list": {
+    "file": "stocks.txt",
+    "source_label": "Synthetic assertion list",
+    "source_date": null,
+    "as_of_date": null,
+    "evidence": [
+      {
+        "symbol": "DEMO_ALPHA",
+        "document": "eligibility.txt",
+        "sha256": "90be0feed212f1a2ce93f845c81c3c84412f9c0cf0c3afdac6614800687c85b4",
+        "effective_date": "2026-10-30",
+        "instrument_type": "stock_option",
+        "contract_row": "Fictional row 1",
+        "review": {
+          "confirmed": true,
+          "reference": "Synthetic fixture review only; no actual exchange or provider verification"
+        }
+      },
+      {
+        "symbol": "DEMO_BETA",
+        "document": "eligibility.txt",
+        "sha256": "90be0feed212f1a2ce93f845c81c3c84412f9c0cf0c3afdac6614800687c85b4",
+        "effective_date": "2026-10-30",
+        "instrument_type": "stock_option",
+        "contract_row": "Fictional row 2",
+        "review": {
+          "confirmed": true,
+          "reference": "Synthetic fixture review only; no actual exchange or provider verification"
+        }
+      },
+      {
+        "symbol": "DEMO_GAMMA",
+        "document": "eligibility.txt",
+        "sha256": "90be0feed212f1a2ce93f845c81c3c84412f9c0cf0c3afdac6614800687c85b4",
+        "effective_date": "2026-10-30",
+        "instrument_type": "stock_option",
+        "contract_row": "Fictional row 3",
+        "review": {
+          "confirmed": true,
+          "reference": "Synthetic fixture review only; no actual exchange or provider verification"
+        }
+      }
+    ]
+  },
+  "filing": "filing.json"
+}

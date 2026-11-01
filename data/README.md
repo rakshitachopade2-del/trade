@@ -72,3 +72,7 @@ eventually stale data. All remain visible with exclusion reasons.
 This schema lacks source revisions, exchange calendars, production quote quality,
 instrument corporate-action handling, options chains and bid/ask fills. It is an
 engineering starting point, not sufficient for real-market backtest conclusions.
+
+## Separate M2A intake
+
+The four-CSV contract above remains specific to M1 replay validation. For independent offline candle/list/filing coverage, use `python -m backend.app.intake` and the [Milestone 2A schema](../docs/MILESTONE_2A.md). `intake-example/` is wholly synthetic; `intake-template/` contains no actual prices or figures. Never manufacture M1 eligibility or availability fields to load an M2A import.

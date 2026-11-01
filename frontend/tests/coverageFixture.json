@@ -1,0 +1,96 @@
+{
+  "api_version": "coverage-api-v1",
+  "state": "report",
+  "report": {
+    "schema_version": "coverage-v1",
+    "parser_version": "local-intake-v1",
+    "status": "coverage_complete",
+    "dataset_id": "synthetic-coverage-example",
+    "dataset_nature": "synthetic_test",
+    "source_label": "Synthetic engineering fixture",
+    "session_date": "2026-10-30",
+    "imported_at": "2026-11-01T11:21:59.823596Z",
+    "stock_count": 3,
+    "benchmark": "NIFTY50",
+    "series": [
+      {
+        "symbol": "DEMO_ALPHA",
+        "instrument_type": "equity",
+        "expected": 9,
+        "present": 9,
+        "missing": [],
+        "duplicates": 0,
+        "outside_window": 1,
+        "missing_volume": 0
+      },
+      {
+        "symbol": "DEMO_BETA",
+        "instrument_type": "equity",
+        "expected": 9,
+        "present": 9,
+        "missing": [],
+        "duplicates": 0,
+        "outside_window": 0,
+        "missing_volume": 0
+      },
+      {
+        "symbol": "DEMO_GAMMA",
+        "instrument_type": "equity",
+        "expected": 9,
+        "present": 9,
+        "missing": [],
+        "duplicates": 0,
+        "outside_window": 0,
+        "missing_volume": 0
+      },
+      {
+        "symbol": "NIFTY50",
+        "instrument_type": "spot_index",
+        "expected": 9,
+        "present": 9,
+        "missing": [],
+        "duplicates": 0,
+        "outside_window": 0,
+        "missing_volume": 0
+      }
+    ],
+    "membership": [
+      {
+        "symbol": "DEMO_ALPHA",
+        "level": "supporting_evidence",
+        "dated_review": true
+      },
+      {
+        "symbol": "DEMO_BETA",
+        "level": "supporting_evidence",
+        "dated_review": true
+      },
+      {
+        "symbol": "DEMO_GAMMA",
+        "level": "supporting_evidence",
+        "dated_review": true
+      }
+    ],
+    "universe_count": 3,
+    "list_duplicates": 1,
+    "unmapped_symbols": 0,
+    "invalid_rows": 0,
+    "outside_window": 1,
+    "duplicate_rows": 0,
+    "schema_valid": true,
+    "source_review": "manual_confirmed",
+    "session_review": "manual_confirmed",
+    "price_adjustment": "unadjusted",
+    "source_dates_known": true,
+    "retention": "permitted",
+    "filing": {
+      "status": "imported",
+      "symbol": "DEMO_ALPHA",
+      "publication_precision": "exact",
+      "reconciliation": "reconciled",
+      "figures_present": 1,
+      "source_known": true
+    },
+    "gaps": []
+  }
+}
