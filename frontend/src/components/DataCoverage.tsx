@@ -49,6 +49,7 @@ export default function DataCoverage() {
         <p>A user list is an assertion, not verified historical eligibility. Absence is not ineligibility. Listing, F&amp;O ban status and contract liquidity are separate.</p>
         <h3>Quarterly filing</h3>
         <p>{report.filing.status === 'not_imported' ? 'Not imported. Financials remain unknown.' : `${report.filing.symbol}: publication ${words(report.filing.publication_precision)} · transcription ${report.filing.reconciliation} · ${report.filing.figures_present} figures supplied. Other companies’ financials remain unknown.`}</p>
+        {report.filing.status === 'imported' && report.filing.figures_present === 0 && <p>No optional financial figures supplied; financial values remain unknown.</p>}
         <p>Manual transcription is not independently verified. Date-only publication cannot pass exact timestamp coverage.</p>
         {report.gaps.length > 0 ? <><h3>Remaining gaps</h3><ul>{report.gaps.map(g => <li key={g}>{gapMessages[g]}</li>)}</ul></> : <p>Declared sample coverage and required manual reviews are complete. This does not establish historical feed availability, market accuracy or profitable trading.</p>}
       </>}

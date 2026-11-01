@@ -332,7 +332,7 @@ class Intake:
                                          source_known=filing.source_url is not None)
             for condition, gap in [(precision != 'exact', 'filing_publication_partial'),
                                    (filing.transcription_status != 'reconciled', 'filing_reconciliation_pending'),
-                                   (not count, 'filing_figures_missing'), (not filing.source_url, 'filing_source_unknown')]:
+                                   (not filing.source_url, 'filing_source_unknown')]:
                 if condition:
                     self.gaps.add(gap)
         except (ValidationError, ValueError, TypeError, OverflowError, RecursionError):

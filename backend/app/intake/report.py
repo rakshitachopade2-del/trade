@@ -7,6 +7,7 @@ from pydantic import Field, field_validator, model_validator
 
 from .schema import Label, Model, Symbol
 
+# filing_figures_missing remains readable for immutable reports from before the optional-figure fix.
 Gap = Literal['manifest_missing', 'manifest_invalid', 'retention_pending', 'candles_missing',
               'invalid_rows', 'missing_bars', 'mapping_unknown', 'source_unknown',
               'source_dates_unknown', 'adjustment_unknown', 'source_review_pending',
@@ -131,7 +132,7 @@ class Coverage(Model):
                 or self.price_adjustment == 'unknown' or not self.source_dates_known or self.retention != 'permitted'
                 or not self.source_label or not self.dataset_id or not self.dataset_nature or not self.session_date
                 or self.filing.status != 'imported' or self.filing.publication_precision != 'exact'
-                or self.filing.reconciliation != 'reconciled' or not self.filing.figures_present or not self.filing.source_known):
+                or self.filing.reconciliation != 'reconciled' or not self.filing.source_known):
                 raise ValueError('complete report lacks required coverage or reviews')
         elif not self.gaps:
             raise ValueError('incomplete report requires gaps')

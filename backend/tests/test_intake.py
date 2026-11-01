@@ -227,6 +227,124 @@ class IntakeTests(unittest.TestCase):
             self.change('filing.json', mutate)
             self.assertEqual(self.run_intake().status, 'invalid')
 
+    def test_optional_figures_complete_through_import_cli_and_api(self):
+        original = json.loads((self.source / 'filing.json').read_text())
+        names = ('revenue', 'profit_attributable_to_owners', 'diluted_eps')
+        private = ROOT / 'private-data'
+        private.mkdir(exist_ok=True)
+        for variant in ('omitted', 'null', 'null_current'):
+            with self.subTest(variant=variant), tempfile.TemporaryDirectory(dir=private) as output:
+                filing = copy.deepcopy(original)
+                for name in names:
+                    filing.pop(name)
+                if variant != 'omitted':
+                    filing.update(dict.fromkeys(names))
+                if variant == 'null_current':
+                    filing['revenue'] = {**original['revenue'], 'current': None}
+                (self.source / 'filing.json').write_text(json.dumps(filing))
+                result = self.run_intake()
+                self.assertEqual(result.status, 'coverage_complete')
+                self.assertEqual(result.filing.figures_present, 0)
+                self.assertEqual(result.gaps, [])
+                normalized = self.normalized()['data']['filing']
+                for name in names:
+                    if name == 'revenue' and variant == 'null_current':
+                        self.assertIsNone(normalized[name]['current'])
+                        self.assertEqual(normalized[name]['prior'], original[name]['prior'])
+                    else:
+                        self.assertIsNone(normalized[name])
+                    self.assertEqual(normalized['yoy'][name], {'value_pct': None, 'reason': 'missing_figures'})
+                cli = subprocess.run([sys.executable, '-m', 'backend.app.intake', str(self.source),
+                                      '--output-root', output], cwd=ROOT, capture_output=True, text=True)
+                self.assertEqual(cli.returncode, 0, cli.stderr)
+                report_file, = Path(output).glob('*/report.json')
+                with patch.dict(os.environ, {'TRADE_COVERAGE_REPORT': str(report_file)}), TestClient(app) as client:
+                    response = client.get('/api/data-coverage')
+                    body = response.json()
+                    self.assertEqual(body['state'], 'report')
+                    self.assertEqual(body['report']['status'], 'coverage_complete')
+                    self.assertEqual(body['report']['filing']['figures_present'], 0)
+                    self.assertEqual(body['report']['gaps'], [])
+                    self.assertNotIn('revenue', response.text)
+                    self.assertNotIn('yoy', response.text)
+
+    def test_supplied_malformed_figures_still_invalidate_intake(self):
+        original = json.loads((self.source / 'filing.json').read_text())
+        invalid = [{}, [], True, {'current': None},
+                   {**original['revenue'], 'page_row_reference': ' '},
+                   {**original['revenue'], 'unknown_field': 1}]
+        for field in ('current', 'prior'):
+            invalid.extend({**original['revenue'], field: value}
+                           for value in ('100', 'NaN', True, float('nan'), float('inf'), -float('inf')))
+        for figure in invalid:
+            with self.subTest(figure=figure):
+                self.change('filing.json', lambda f: f.update(revenue=figure))
+                report = self.run_intake()
+                self.assertEqual(report.status, 'invalid')
+                self.assertFalse(report.schema_valid)
+                self.assertIn('invalid_rows', report.gaps)
+                self.assertNotIn('filing_figures_missing', report.gaps)
+
+    def test_zero_figures_do_not_bypass_required_filing_or_reviews(self):
+        self.change('filing.json', lambda f: f.update(revenue=None))
+        originals = {p.name: p.read_bytes() for p in self.source.iterdir() if p.is_file()}
+        cases = [
+            ('filing metadata', lambda: (self.source / 'filing.json').unlink(), 'partial', 'filing_missing'),
+            ('filing document', lambda: (self.source / 'filing.txt').unlink(), 'partial', 'filing_missing'),
+            ('publication support', lambda: (self.source / 'publication.txt').unlink(), 'partial', 'filing_publication_partial'),
+            ('publication precision', lambda: self.change('filing.json', lambda f: f.update(publication={'precision': 'unknown'})), 'partial', 'filing_publication_partial'),
+            ('unreconciled', lambda: self.change('filing.json', lambda f: f.update(transcription_status='transcribed', reconciliation_reference=None)), 'partial', 'filing_reconciliation_pending'),
+            ('reconciliation reference', lambda: self.change('filing.json', lambda f: f.update(reconciliation_reference=None)), 'invalid', 'invalid_rows'),
+            ('filing source', lambda: self.change('filing.json', lambda f: f.update(source_url=None)), 'partial', 'filing_source_unknown'),
+            ('source review', lambda: self.change('manifest.json', lambda m: m['source_review'].update(confirmed=False, reference=None)), 'partial', 'source_review_pending'),
+            ('session review', lambda: self.change('manifest.json', lambda m: m['normal_session_review'].update(confirmed=False, reference=None)), 'partial', 'session_review_pending'),
+            ('eligibility review', lambda: self.change('manifest.json', lambda m: m['stock_list']['evidence'][0]['review'].update(confirmed=False, reference=None)), 'partial', 'eligibility_review_pending'),
+            ('candle interval', lambda: self.write_rows(self.rows()[1:]), 'partial', 'missing_bars'),
+        ]
+        for name, mutate, status, gap in cases:
+            with self.subTest(requirement=name):
+                for filename, raw in originals.items():
+                    (self.source / filename).write_bytes(raw)
+                mutate()
+                report = self.run_intake()
+                self.assertEqual(report.status, status)
+                self.assertEqual(report.filing.figures_present, 0)
+                self.assertIn(gap, report.gaps)
+                self.assertNotIn('filing_figures_missing', report.gaps)
+                if name == 'unreconciled':
+                    self.assertEqual(report.filing.reconciliation, 'transcribed')
+
+    def test_legacy_figure_gap_remains_readable_and_immutable_on_rerun(self):
+        self.change('filing.json', lambda f: f.update(revenue=None))
+        self.run_intake()
+        # A disposable pre-correction report fixture, never a genuine historical report.
+        legacy = copy.deepcopy(self.envelope)
+        legacy['coverage'].update(status='partial', gaps=['filing_figures_missing'])
+        legacy_path = self.root / 'legacy-report.json'
+        legacy_raw = json.dumps(legacy).encode()
+        legacy_path.write_bytes(legacy_raw)
+        with patch.dict(os.environ, {'TRADE_COVERAGE_REPORT': str(legacy_path)}), TestClient(app) as client:
+            body = client.get('/api/data-coverage').json()
+            self.assertEqual(body['state'], 'report')
+            self.assertEqual(body['report']['status'], 'partial')
+            self.assertEqual(body['report']['gaps'], ['filing_figures_missing'])
+        previous_dir = self.directory
+        self.assertEqual(self.run_intake().status, 'coverage_complete')
+        self.assertNotEqual(self.directory, previous_dir)
+        self.assertEqual(legacy_path.read_bytes(), legacy_raw)
+
+    def test_invalid_figure_counts_are_rejected_by_coverage_api(self):
+        self.change('filing.json', lambda f: f.update(revenue=None))
+        self.run_intake()
+        report_file = self.root / 'count-test-report.json'
+        for count in (-1, 4, 0.5, True, None, '0', float('nan'), float('inf')):
+            with self.subTest(count=count):
+                envelope = copy.deepcopy(self.envelope)
+                envelope['coverage']['filing']['figures_present'] = count
+                report_file.write_text(json.dumps(envelope))
+                with patch.dict(os.environ, {'TRADE_COVERAGE_REPORT': str(report_file)}), TestClient(app) as client:
+                    self.assertEqual(client.get('/api/data-coverage').json()['state'], 'invalid_report')
+
     def test_yoy_only_comparable_positive_denominator(self):
         self.run_intake()
         self.assertEqual(self.normalized()['data']['filing']['yoy']['revenue']['value_pct'], 25.0)

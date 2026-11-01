@@ -9,6 +9,7 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 let backend: ChildProcess | undefined;
 let reportPath = '';
 let originalReport: string;
+let noFiguresReport: string;
 
 function prepareCoverage() {
   const directory = execFileSync(`${root}.venv/bin/python`, ['-c', 'from pathlib import Path; from backend.app.intake.runner import run_import; print(run_import(Path("data/intake-example"), Path("private-data/browser-checks"))[0])'], { cwd: root, encoding: 'utf8' }).trim();
@@ -16,6 +17,21 @@ function prepareCoverage() {
   // Mutate only a disposable browser fixture, preserving the original import run.
   reportPath = `${root}${directory}/browser-report.json`;
   writeFileSync(reportPath, originalReport);
+  const noFiguresDirectory = execFileSync(`${root}.venv/bin/python`, ['-c', `
+import json, shutil, tempfile
+from pathlib import Path
+from backend.app.intake.runner import run_import
+with tempfile.TemporaryDirectory() as temporary:
+    source = Path(temporary) / 'input'
+    shutil.copytree('data/intake-example', source)
+    filing_path = source / 'filing.json'
+    filing = json.loads(filing_path.read_text())
+    for name in ('revenue', 'profit_attributable_to_owners', 'diluted_eps'):
+        filing.pop(name)
+    filing_path.write_text(json.dumps(filing))
+    print(run_import(source, Path('private-data/browser-checks'))[0])
+`], { cwd: root, encoding: 'utf8' }).trim();
+  noFiguresReport = readFileSync(`${root}${noFiguresDirectory}/report.json`, 'utf8');
 }
 
 async function startBackend() {
@@ -186,4 +202,37 @@ test('coverage view uses offline reports and keeps research synthetic across all
   await expect(page.getByText('Synthetic demo', { exact: true })).toBeVisible();
   await expect(page.getByText('Contract not evaluated', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /ALPHA/ })).toBeVisible();
+});
+
+test('optional financial figures allow complete coverage and legacy reports remain partial', async ({ page }, testInfo) => {
+  writeFileSync(reportPath, noFiguresReport);
+  try {
+    const api = await page.request.get('/api/data-coverage');
+    const body = await api.json();
+    expect(body.state).toBe('report');
+    expect(body.report.status).toBe('coverage_complete');
+    expect(body.report.filing.figures_present).toBe(0);
+    expect(body.report.gaps).toEqual([]);
+    await page.goto('/');
+    const coverage = page.getByRole('region', { name: 'Data coverage', exact: true });
+    await expect(coverage.getByText('Coverage complete', { exact: true })).toBeVisible();
+    await coverage.getByText('View coverage details').click();
+    await expect(coverage.getByText('No optional financial figures supplied; financial values remain unknown.')).toBeVisible();
+    await expect(coverage.getByText('9 / 9')).toHaveCount(4);
+    await expect(coverage.getByText('Synthetic test — not a real-data trial')).toBeVisible();
+    await checkLayout(page);
+    await coverage.screenshot({ path: testInfo.outputPath('coverage-complete-no-figures.png') });
+
+    const legacy = JSON.parse(noFiguresReport);
+    Object.assign(legacy.coverage, { status: 'partial', gaps: ['filing_figures_missing'] });
+    writeFileSync(reportPath, JSON.stringify(legacy));
+    await coverage.getByRole('button', { name: 'Refresh coverage' }).click();
+    await expect(coverage.getByText('Partial', { exact: true })).toBeVisible();
+    await expect(coverage.getByText(/Legacy report: optional figures no longer block completion/)).toBeVisible();
+    await expect(page.getByText('Synthetic demo', { exact: true })).toBeVisible();
+    await expect(page.getByText('Contract not evaluated', { exact: true })).toBeVisible();
+    await checkLayout(page);
+  } finally {
+    writeFileSync(reportPath, originalReport);
+  }
 });

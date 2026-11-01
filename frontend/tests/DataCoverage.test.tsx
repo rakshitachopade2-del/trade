@@ -59,6 +59,70 @@ describe('separate data coverage', () => {
     expect(screen.queryByText('Coverage complete')).not.toBeInTheDocument();
   });
 
+  it('accepts complete coverage with zero optional figures and keeps values unknown', async () => {
+    const body = copy();
+    body.report.filing.figures_present = 0;
+    serve(body); render(<DataCoverage />);
+    expect(await screen.findByText('Coverage complete')).toBeInTheDocument();
+    await expand();
+    expect(screen.getByText('No optional financial figures supplied; financial values remain unknown.')).toBeVisible();
+    expect(screen.getByText(/0 figures supplied/)).toBeVisible();
+    expect(screen.getByText('Synthetic test — not a real-data trial')).toBeVisible();
+    expect(screen.queryByText('Remaining gaps')).not.toBeInTheDocument();
+  });
+
+  it('does not reconcile a zero-figure filing automatically', async () => {
+    const body = copy();
+    Object.assign(body.report, { status: 'partial', gaps: ['filing_reconciliation_pending'] });
+    Object.assign(body.report.filing, { figures_present: 0, reconciliation: 'transcribed' });
+    serve(body); render(<DataCoverage />);
+    expect(await screen.findByText('Partial')).toBeInTheDocument(); await expand();
+    expect(screen.getByText(/transcription transcribed/)).toBeVisible();
+    expect(screen.getByText(/No optional financial figures supplied/)).toBeVisible();
+    expect(screen.getByText(/Manually reconcile the filing transcription/)).toBeVisible();
+  });
+
+  it('keeps legacy figure-gap reports partial and explains how to regenerate them', async () => {
+    const body = copy();
+    Object.assign(body.report, { status: 'partial', gaps: ['filing_figures_missing'] });
+    body.report.filing.figures_present = 0;
+    serve(body); render(<DataCoverage />);
+    expect(await screen.findByText('Partial')).toBeInTheDocument(); await expand();
+    expect(screen.getByText(/Legacy report: optional figures no longer block completion/)).toBeVisible();
+    expect(screen.getByText(/Rerun the original inputs to generate a new report; preserve this report/)).toBeVisible();
+    expect(screen.queryByText('Coverage complete')).not.toBeInTheDocument();
+  });
+
+  it('rejects invalid figure counts even when a complete report may have zero', async () => {
+    for (const count of [-1, 4, 0.5, true, null, '0', NaN, Infinity]) {
+      const body = copy();
+      Object.assign(body.report.filing, { figures_present: count });
+      serve(body);
+      await expect(getCoverage(new AbortController().signal)).rejects.toThrow(/malformed report/);
+    }
+  });
+
+  it('still rejects complete zero-figure reports without the other required coverage', async () => {
+    const original = copy();
+    original.report.filing.figures_present = 0;
+    const reports = [
+      { ...original.report, filing: { ...original.report.filing, status: 'not_imported', symbol: null, publication_precision: 'unknown', reconciliation: 'unreviewed', source_known: false } },
+      { ...original.report, filing: { ...original.report.filing, publication_precision: 'date_only' } },
+      { ...original.report, filing: { ...original.report.filing, reconciliation: 'transcribed' } },
+      { ...original.report, filing: { ...original.report.filing, source_known: false } },
+      { ...original.report, source_review: 'pending' },
+      { ...original.report, session_review: 'pending' },
+      { ...original.report, retention: 'unresolved' },
+      { ...original.report, membership: original.report.membership.map(m => ({ ...m, dated_review: false })) },
+      { ...original.report, series: original.report.series.map(s => ({ ...s, present: 8, missing: ['09:20'] })) },
+      { ...original.report, gaps: ['filing_publication_partial'] },
+    ];
+    for (const report of reports) {
+      serve({ ...original, report });
+      await expect(getCoverage(new AbortController().signal)).rejects.toThrow(/malformed report/);
+    }
+  });
+
   it('keeps invalid inputs distinct from absent inputs and backend errors', async () => {
     const body = copy();
     Object.assign(body.report, { status: 'invalid', schema_valid: false, invalid_rows: 1, gaps: ['invalid_rows'] });

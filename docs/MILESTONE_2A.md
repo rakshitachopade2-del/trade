@@ -1,6 +1,6 @@
 # Milestone 2A — offline intake and coverage
 
-Implemented 1 November 2026. **Software verification is separate from real-data coverage. No genuine market files were supplied.** The research desk still uses only M1 synthetic data. This importer never writes M1 eligibility/evidence records and never changes rankings or contract status.
+Implemented 1 November 2026. **Software verification uses synthetic fixtures and is separate from real-data coverage.** The research desk still uses only M1 synthetic data. This importer never writes M1 eligibility/evidence records and never changes rankings or contract status.
 
 ## Run locally
 
@@ -148,7 +148,7 @@ Publication has exactly one precision:
 
 These timestamps are **format examples**, not claims about Infosys publication. Exact precision requires identified support; a missing support document remains a coverage gap. Date-only data never becomes midnight. Unknown/date-only cannot carry an exact timestamp. Publication before the reporting quarter end, after actual ingestion, or a claimed acquisition before publication is rejected. Date comparisons use only the precision available. PDF creation, signatures, board-meeting end and press-conference times are not dissemination timestamps.
 
-Optional figures are exactly `revenue`, `profit_attributable_to_owners`, and `diluted_eps`, each null or:
+Optional figures are exactly `revenue`, `profit_attributable_to_owners`, and `diluted_eps`, each omitted, null or:
 
 ```json
 {
@@ -160,7 +160,7 @@ Optional figures are exactly `revenue`, `profit_attributable_to_owners`, and `di
 }
 ```
 
-All figures share the filing's accounting basis and scope. Do not enter total profit as profit attributable to owners; `total_profit` is an unsupported field. Values must be finite or null. YoY is calculated only with both figures, equal units, two three-month periods, the declared current quarter and its corresponding prior-year quarter, and a positive prior denominator. Otherwise the private normalized output has null plus `missing_figures`, `incomparable_units_or_periods`, `nonpositive_prior_denominator`, or `numeric_overflow`. Missing consensus, valuation, bullishness and scores are not inferred. At least one sourced current value is required for the filing-figure coverage check; other values can remain null, and a valid filing may have no computable YoY.
+All figures share the filing's accounting basis and scope. Do not enter total profit as profit attributable to owners; `total_profit` is an unsupported field. Values must be finite or null. YoY is calculated only with both figures, equal units, two three-month periods, the declared current quarter and its corresponding prior-year quarter, and a positive prior denominator. Otherwise the private normalized output has null plus `missing_figures`, `incomparable_units_or_periods`, `nonpositive_prior_denominator`, or `numeric_overflow`. Missing consensus, valuation, bullishness and scores are not inferred. Financial figures are optional: omitting all three, setting them to null, or supplying valid figure objects with null current values does not block overall completion. `figures_present` counts non-null current values (0–3); zero does not mean a financial value of zero. Missing values and unavailable YoY remain unknown. Supplied figure objects must still satisfy the full strict schema; malformed/nonfinite values remain invalid. A filing with no figures still needs its document, source, supported publication and explicit reconciliation/reference; no review is assigned automatically.
 
 ## Outputs, privacy and provenance
 
@@ -181,7 +181,13 @@ These files stay under ignored private storage. The API returns only a validated
 
 **Partial** includes missing intervals or files, unknown source dates/adjustment, unresolved symbol mappings, missing equity volume, pending normal-session/source review, missing dated eligibility review, missing filing, date-only/unknown publication, missing exact-publication support, missing filing source URL, or unreconciled transcription. Schema validity, price completeness, source review and documentary review are separate fields. Outside-window rows and identical duplicates are reported but do not alone prevent completion.
 
-**Coverage complete** requires all nine accepted intervals per series plus required metadata/reviews and one sufficiently catalogued/reconciled filing with supported exact publication. It does not certify source accuracy, exchange eligibility, historical feed availability, licensing, profitability or option suitability. A **Synthetic test** complete report never establishes a successful real-data trial.
+**Coverage complete** requires all nine accepted intervals per series plus required metadata/reviews and one sufficiently catalogued/reconciled filing with supported exact publication. Optional figures may all be absent (`figures_present: 0`); every other required coverage/review check remains in force. It does not certify source accuracy, exchange eligibility, historical feed availability, licensing, profitability or option suitability. A **Synthetic test** complete report never establishes a successful real-data trial.
+
+### Existing reports after the optional-figures correction
+
+Previously generated reports are immutable. The API/UI continue accepting the legacy `filing_figures_missing` gap and display its recorded partial status with guidance to rerun the original inputs. New imports no longer emit this gap. Do not edit old reports or invent a figure to clear it.
+
+Run `.venv/bin/python -m backend.app.intake /absolute/path/to/original-inputs` under the corrected code (only for inputs whose retention is permitted). This creates a new run directory and actual ingestion timestamp; preserve the original report and its provenance. Configure `TRADE_COVERAGE_REPORT` to the newly printed report path and restart the backend. Missing other required evidence/reviews will still produce partial/invalid coverage; this correction does not establish genuine-data validation.
 
 ## Verification and remaining input
 

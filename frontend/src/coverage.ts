@@ -17,7 +17,7 @@ export const gapMessages = {
   filing_missing: 'Import one filing document with manually entered metadata.',
   filing_publication_partial: 'Exact publication-time coverage needs a supported dissemination timestamp.',
   filing_reconciliation_pending: 'Manually reconcile the filing transcription against source pages.',
-  filing_figures_missing: 'Record at least one sourced financial figure; missing values stay unknown.',
+  filing_figures_missing: 'Legacy report: optional figures no longer block completion. Rerun the original inputs to generate a new report; preserve this report.',
   filing_source_unknown: 'Record the filing source URL in its private metadata.',
   equity_volume_missing: 'Equity volume is missing; zero volume is preserved separately.',
 } as const;
@@ -87,7 +87,7 @@ function validReport(r: unknown): r is CoverageReport {
     && r.invalid_rows === 0 && r.unmapped_symbols === 0 && members.every(m => m.dated_review)
     && r.source_review === 'manual_confirmed' && r.session_review === 'manual_confirmed' && r.price_adjustment !== 'unknown'
     && r.source_dates_known && r.retention === 'permitted' && !!r.source_label && !!r.dataset_id && !!r.dataset_nature && !!r.session_date
-    && f.status === 'imported' && f.publication_precision === 'exact' && f.reconciliation === 'reconciled' && f.figures_present > 0 && f.source_known;
+    && f.status === 'imported' && f.publication_precision === 'exact' && f.reconciliation === 'reconciled' && f.source_known;
 }
 
 export async function getCoverage(signal: AbortSignal): Promise<CoverageResponse> {

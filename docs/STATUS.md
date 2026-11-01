@@ -2,18 +2,48 @@
 
 Updated: 1 November 2026 (IST).
 
+## Optional financial figures correction — 1 November 2026
+
+- Corrected on existing `feat/milestone-2a-local-intake`, starting at reviewed HEAD `4b9ddea8e949814696ac39e4efdbbf60eaf45725`. No newer tracked changes were present. The correction was initially left uncommitted for review; the owner subsequently authorized commit and push to this feature branch. No reset or branch change. The supplied untracked `Dev Ref/Trade_Public_Data_2026-11-01/` was preserved.
+- New imports no longer emit `filing_figures_missing` solely for absent optional figures. `figures_present` remains an accurate integer 0–3; backend and frontend accept zero in otherwise complete reports. UI explicitly says absent financial values remain unknown. Figure schema, YoY rules, filing document/source/publication support/reconciliation reference and all other required coverage checks are unchanged; reconciliation is never assigned automatically.
+- Older immutable reports retain their original status and legacy gap code, with UI guidance to rerun original permitted inputs into a new run and configure its report path. No existing report was migrated. Current contract and rerun instructions are in `docs/API_CONTRACT.md` and `docs/MILESTONE_2A.md`. This resolves the figure-gate finding in the historical entries below.
+- Regressions cover omitted fields, explicit null fields and a valid figure object with null current value; all three pass complete intake/CLI/API with zero figures, preserving unknown values/YoY. Other tests cover malformed/nonfinite supplied figures, invalid counts, missing filing/document/publication support/source/reconciliation/reference, pending source/session/eligibility reviews, missing candles and legacy reports.
+
+### Verification actually run for this correction
+
+| Command/check | Actual result |
+| --- | --- |
+| `.venv/bin/python -m unittest backend.tests.test_intake -v` | **25 passed** in 3.430 s, including five new regression methods and their subcases. Exercises CLI and coverage API. |
+| `npm --prefix frontend test` | **17 passed** across both frontend test files, including five new coverage tests. |
+| `npm --prefix frontend run typecheck` | Passed. |
+| `npm --prefix frontend run build` | Passed; 47 modules. |
+| `npm --prefix frontend run test:browser -- --grep 'coverage view|optional financial figures' --output artifacts/optional-figures-20261101T181533/browser` | **8 passed** in 34.3 s: real importer/API, zero-figure complete state, legacy partial state and existing coverage states across desktop/tablet/mobile/320px. |
+| Accessibility/layout and screenshots | Checked browser states had no axe violations or horizontal overflow. Desktop and 320px zero-figure screenshots visually inspected; optional/unknown explanation visible without clipping. |
+| Preservation inventory | **119 existing files unchanged** by SHA-256, byte length and mtime: private inputs/import reports and the supplied reference pack. New browser imports use invented fixtures in new run directories. |
+| `git diff --check` | Passed. |
+
+Used existing Python 3.12.16 and Node 24.21.0 environments; no dependencies installed. Existing Starlette/httpx and Playwright color-environment warnings are non-failing. Expected proxy errors during the coverage outage/recovery check are recorded. The verified project backend on port 8000 was temporarily stopped for browser checks and restored (PID 56191) with its original `not_imported` coverage state. Logs/screenshots and preservation checks are in ignored `artifacts/optional-figures-20261101T181533/`.
+
+Not rerun: full backend discovery, standalone M1 replay/outage browser tests, fixture-validation/HTTP helper checks, Safari/Firefox or physical-device checks. The affected intake suite, full frontend unit suite and coverage browser regressions above passed; no genuine-data intake was performed for this correction.
+
+### Supplied public-source pack inspection (read-only)
+
+Read `Dev Ref/Trade_Public_Data_2026-11-01/READ_ME_AND_CODEX.txt` and inspected its six-file pack. It contains a three-symbol list, example option rows, source manifest, eligibility-review drafts and transcribed filing metadata; original provider documents and candles are absent. Draft eligibility reviews remain false, filing publication is date-only and transcription is not reconciled. The pack itself states that retention permission and real-data coverage are not established. Its source/figure claims were not independently verified against originals in this task.
+
+The existing `private-data/real-sample/` still has its original blank/scaffolding inputs and unresolved retention. No pack files were copied into it, no inputs/review confirmations were changed, and no URLs were fetched, following the current instruction to correct only software and avoid acquisition/private-input changes. The pack remains untracked and is not included in any commit. Genuine validation still needs permitted candle inputs, matching original supporting documents, exact dissemination support and required source/session/eligibility/reconciliation reviews; optional financial figures are no longer a blocker. No broker/API connection, purchase, deployment or trading occurred.
+
 ## Owner-authorized feature-branch publication — 1 November 2026
 
 - Following explicit owner instruction to commit and push, `git push -u origin feat/milestone-2a-local-intake` published implementation `9f0a1d04a534d741130217b74d8cc25c856d95b4`. `git ls-remote` confirmed the exact branch commit; remote main remains `a407e043e781d4d5e88794173f046c5d04ba6477`.
 - The accompanying documentation update records review findings and adds `Dev Ref/M2A_REVIEW_PREPARATION.md` and `Dev Ref/M2A_AI_CHAT_HANDOFF.md`. Read the shorter preparation handoff first. Ignored review artifacts and private sample inputs/reports remain local-only.
-- No application behavior changed. The financial-figure gate remains unresolved and genuine-data validation remains pending (exit 1, partial, 0/36 bars). Existing implementation test results below are historical; full suites were not rerun for this documentation-only update.
+- At that publication stage no application behavior changed. The financial-figure gate remained unresolved and genuine-data validation remains pending (exit 1, partial, 0/36 bars). Existing implementation test results below are historical; full suites were not rerun for this documentation-only update.
 - No merge, history rewrite, global Git identity change or deployment. Earlier local-only/no-push entries describe their respective stages and are superseded by this publication update.
 
 ## Bounded M2A review preparation — 1 November 2026
 
 - Preserved `feat/milestone-2a-local-intake` at `9f0a1d04a534d741130217b74d8cc25c856d95b4`. Exported 36 committed files/additions/tests against `a407e043e781d4d5e88794173f046c5d04ba6477` to ignored `artifacts/reviews/m2a-9f0a1d0/M2A_committed_review.patch`. Credential-pattern and data-inventory checks found no credentials/private market inputs; exported data is synthetic fixtures or empty templates.
 - Initial state: no tracked edits; only `Dev Ref/M2A_AI_CHAT_HANDOFF.md` untracked. This task adds this documentation log and `Dev Ref/M2A_REVIEW_PREPARATION.md`, excluded from the committed patch. No commits/pushes/resets during that bounded preparation.
-- Finding (unchanged): null figures are schema-valid (`schema.py:192`), but zero current figures adds `filing_figures_missing` (`runner.py:335`) and gates overall completion (`runner.py:346`, `report.py:134`, frontend coverage validator `:90`). Isolated synthetic probe: otherwise complete, 36 bars, exact/reconciled filing, all figures null => partial with that sole gap. Two related existing tests passed; no full-suite rerun.
+- Historical finding (subsequently corrected above): null figures are schema-valid (`schema.py:192`), but zero current figures adds `filing_figures_missing` (`runner.py:335`) and gates overall completion (`runner.py:346`, `report.py:134`, frontend coverage validator `:90`). Isolated synthetic probe: otherwise complete, 36 bars, exact/reconciled filing, all figures null => partial with that sole gap. Two related existing tests passed; no full-suite rerun.
 - Created ignored `private-data/real-sample/` from the blank template because it was absent. Candidate mappings preserved, user_import, empty list/header-only candles, no configured filing, null figures/unknown publication, unresolved retention, false reviews. Provider timezone set to null in this private copy. No invented evidence copied there; input hashes unchanged after intake.
 - `.venv/bin/python -m backend.app.intake private-data/real-sample` returned exit **1**, **partial**, **0/36 bars**. Report: `private-data/imports/20261101T120739858148Z-3d1ed43fb95b/report.json`. Gaps: `adjustment_unknown`, `eligibility_review_pending`, `filing_missing`, `missing_bars`, `retention_pending`, `session_review_pending`, `source_dates_unknown`, `source_review_pending`, `source_unknown`, `stock_list_missing`. Genuine validation remains pending; provider data not read/retained while permission is unresolved.
 - Short handoff and missing-files/facts checklist: `Dev Ref/M2A_REVIEW_PREPARATION.md`. Export metadata, isolated reproduction and CLI output: ignored `artifacts/reviews/m2a-9f0a1d0/`. Application source/dashboard unchanged.
